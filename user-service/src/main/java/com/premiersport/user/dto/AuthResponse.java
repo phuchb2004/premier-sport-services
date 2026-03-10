@@ -4,6 +4,7 @@ import com.premiersport.user.entity.UserEntity;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -23,6 +24,6 @@ public class AuthResponse {
         private String lastName;
         private String role;
         private List<UserEntity.Address> addresses;
-        private String createdAt;
+        private Instant createdAt;
     }
 }

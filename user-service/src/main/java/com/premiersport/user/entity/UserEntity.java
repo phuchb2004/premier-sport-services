@@ -1,5 +1,6 @@
 package com.premiersport.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class UserEntity {
     @Indexed(unique = true)
     private String email;
 
+    @JsonIgnore
     private String password;
 
     private String firstName;

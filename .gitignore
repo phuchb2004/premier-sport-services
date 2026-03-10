@@ -2,3 +2,12 @@ target/
 .env
 *.class
 *.jar
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store

@@ -116,7 +116,7 @@ public class UserService {
                         .lastName(user.getLastName())
                         .role(user.getRole().name())
                         .addresses(user.getAddresses())
-                        .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
+                        .createdAt(user.getCreatedAt())
                         .build())
                 .build();
     }

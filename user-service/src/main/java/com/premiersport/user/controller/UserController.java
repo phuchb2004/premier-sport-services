@@ -3,6 +3,8 @@ package com.premiersport.user.controller;
 import com.premiersport.common.dto.ApiResponse;
 import com.premiersport.user.dto.ChangePasswordRequest;
 import com.premiersport.user.dto.UpdateProfileRequest;
+import com.premiersport.user.dto.UpdateRoleRequest;
+import com.premiersport.user.dto.UpdateStatusRequest;
 import com.premiersport.user.entity.UserEntity;
 import com.premiersport.user.service.UserService;
 import jakarta.validation.Valid;
@@ -69,8 +71,8 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserEntity>> updateRole(
             @PathVariable String id,
-            @RequestBody java.util.Map<String, String> body) {
-        UserEntity user = userService.updateRole(id, body.get("role"));
+            @Valid @RequestBody UpdateRoleRequest request) {
+        UserEntity user = userService.updateRole(id, request.getRole());
         return ResponseEntity.ok(ApiResponse.success("Role updated", user));
     }
 
@@ -78,8 +80,8 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserEntity>> updateStatus(
             @PathVariable String id,
-            @RequestBody java.util.Map<String, Boolean> body) {
-        UserEntity user = userService.updateStatus(id, body.get("enabled"));
+            @Valid @RequestBody UpdateStatusRequest request) {
+        UserEntity user = userService.updateStatus(id, request.getEnabled());
         return ResponseEntity.ok(ApiResponse.success("Status updated", user));
     }
 }

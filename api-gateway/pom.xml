@@ -16,10 +16,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.premiersport</groupId>
-            <artifactId>common-lib</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
