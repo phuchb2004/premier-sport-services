@@ -1,0 +1,27 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: chatbot-service
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/premier-sport-dev}
+      database: ${MONGODB_DATABASE:premier-sport-dev}
+
+openai:
+  api-key: ${OPENAI_API_KEY:sk-placeholder}
+  model: ${OPENAI_MODEL:gpt-4o}
+
+product-service:
+  url: ${PRODUCT_SERVICE_URL:http://localhost:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.premiersport: DEBUG

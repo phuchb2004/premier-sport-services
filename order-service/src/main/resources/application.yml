@@ -1,0 +1,27 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: order-service
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/premier-sport-dev}
+      database: ${MONGODB_DATABASE:premier-sport-dev}
+
+jwt:
+  secret: ${JWT_SECRET:premier-sport-jwt-secret-key-must-be-at-least-32-characters}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:sk_test_placeholder}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_placeholder}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.premiersport: DEBUG
