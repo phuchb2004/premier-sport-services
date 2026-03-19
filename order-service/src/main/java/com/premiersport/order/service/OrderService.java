@@ -14,29 +14,29 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
+    static final double DELIVERY_COST = 4.99;
+
     private final OrderRepository orderRepository;
     private final CartService cartService;
+    private final CounterService counterService;
 
-    private final AtomicLong dailySequence = new AtomicLong(0);
-    private volatile String lastDate = "";
-
-    public OrderEntity createFromCart(String userId, CreateOrderRequest request) {
+    public OrderEntity createFromCart(String userId, String customerEmail, CreateOrderRequest request) {
         CartEntity cart = cartService.getOrCreateCart(userId);
 
         if (cart.getItems().isEmpty()) {
             throw ApiException.badRequest("Cart is empty");
         }
 
-        double total = cart.getItems().stream()
+        double itemsTotal = cart.getItems().stream()
                 .mapToDouble(i -> i.getUnitPrice() * i.getQuantity())
                 .sum();
+        double total = itemsTotal + DELIVERY_COST;
 
         CreateOrderRequest.ShippingAddressDto addrDto = request.getShippingAddress();
         OrderEntity.ShippingAddress address = OrderEntity.ShippingAddress.builder()
@@ -50,6 +50,7 @@ public class OrderService {
         OrderEntity order = OrderEntity.builder()
                 .orderNumber(generateOrderNumber())
                 .userId(userId)
+                .customerEmail(customerEmail)
                 .items(List.copyOf(cart.getItems()))
                 .shippingAddress(address)
                 .status(OrderEntity.OrderStatus.PENDING)
@@ -58,7 +59,15 @@ public class OrderService {
                 .build();
 
         order = orderRepository.save(order);
-        cartService.clearCart(userId);
+
+        // Best-effort cart clear: order is already persisted, so cart sync failure is not fatal
+        try {
+            cartService.clearCart(userId);
+        } catch (Exception e) {
+            log.error("Failed to clear cart for user {} after order {} creation — cart may be stale",
+                    userId, order.getOrderNumber());
+        }
+
         log.info("Order created: {} for user {}", order.getOrderNumber(), userId);
         return order;
     }
@@ -111,13 +120,9 @@ public class OrderService {
         }
     }
 
-    private synchronized String generateOrderNumber() {
+    private String generateOrderNumber() {
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        if (!today.equals(lastDate)) {
-            lastDate = today;
-            dailySequence.set(0);
-        }
-        long seq = dailySequence.incrementAndGet();
+        long seq = counterService.getNextSequence("order_" + today);
         return String.format("PS-%s-%04d", today, seq);
     }
 }

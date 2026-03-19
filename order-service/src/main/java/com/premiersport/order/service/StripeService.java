@@ -11,6 +11,7 @@ import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.PaymentIntent;
 import com.stripe.net.Webhook;
 import com.stripe.param.PaymentIntentCreateParams;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,13 @@ public class StripeService {
     @Value("${stripe.webhook-secret}")
     private String webhookSecret;
 
+    // Fix #9: Set Stripe.apiKey once at startup to avoid thread-unsafe repeated assignment
+    @PostConstruct
+    public void init() {
+        Stripe.apiKey = stripeSecretKey;
+        log.info("Stripe initialized");
+    }
+
     public Map<String, String> createPaymentIntent(String orderId, String userId) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> ApiException.notFound("Order not found"));
@@ -45,8 +53,6 @@ public class StripeService {
         }
 
         try {
-            Stripe.apiKey = stripeSecretKey;
-
             long amountInPence = Math.round(order.getTotal() * 100);
 
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
@@ -96,20 +102,12 @@ public class StripeService {
         EventDataObjectDeserializer deserializer = event.getDataObjectDeserializer();
 
         switch (event.getType()) {
-            case "payment_intent.succeeded" -> {
-                deserializer.getObject().ifPresent(obj -> {
-                    if (obj instanceof PaymentIntent intent) {
-                        handlePaymentSucceeded(intent);
-                    }
-                });
-            }
-            case "payment_intent.payment_failed" -> {
-                deserializer.getObject().ifPresent(obj -> {
-                    if (obj instanceof PaymentIntent intent) {
-                        handlePaymentFailed(intent);
-                    }
-                });
-            }
+            case "payment_intent.succeeded" -> deserializer.getObject().ifPresent(obj -> {
+                if (obj instanceof PaymentIntent intent) handlePaymentSucceeded(intent);
+            });
+            case "payment_intent.payment_failed" -> deserializer.getObject().ifPresent(obj -> {
+                if (obj instanceof PaymentIntent intent) handlePaymentFailed(intent);
+            });
             default -> log.debug("Unhandled Stripe event type: {}", event.getType());
         }
     }

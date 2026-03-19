@@ -29,6 +29,8 @@ public class OrderEntity {
     @Indexed
     private String userId;
 
+    private String customerEmail;
+
     private List<CartEntity.CartItem> items;
 
     private ShippingAddress shippingAddress;

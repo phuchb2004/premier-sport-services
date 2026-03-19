@@ -1,6 +1,7 @@
 package com.premiersport.order.controller;
 
 import com.premiersport.common.dto.ApiResponse;
+import com.premiersport.order.config.UserPrincipal;
 import com.premiersport.order.dto.AddCartItemRequest;
 import com.premiersport.order.dto.UpdateCartItemRequest;
 import com.premiersport.order.entity.CartEntity;
@@ -19,35 +20,38 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<CartEntity>> getCart(@AuthenticationPrincipal String userId) {
-        return ResponseEntity.ok(ApiResponse.success(cartService.getOrCreateCart(userId)));
+    public ResponseEntity<ApiResponse<CartEntity>> getCart(
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(ApiResponse.success(cartService.getOrCreateCart(principal.userId())));
     }
 
     @PostMapping("/items")
     public ResponseEntity<ApiResponse<CartEntity>> addItem(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody AddCartItemRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(cartService.addItem(userId, request)));
+        return ResponseEntity.ok(ApiResponse.success(cartService.addItem(principal.userId(), request)));
     }
 
     @PutMapping("/items/{itemIndex}")
     public ResponseEntity<ApiResponse<CartEntity>> updateItem(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable int itemIndex,
             @Valid @RequestBody UpdateCartItemRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(cartService.updateItem(userId, itemIndex, request.getQuantity())));
+        return ResponseEntity.ok(ApiResponse.success(
+                cartService.updateItem(principal.userId(), itemIndex, request.getQuantity())));
     }
 
     @DeleteMapping("/items/{itemIndex}")
     public ResponseEntity<ApiResponse<CartEntity>> removeItem(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable int itemIndex) {
-        return ResponseEntity.ok(ApiResponse.success(cartService.removeItem(userId, itemIndex)));
+        return ResponseEntity.ok(ApiResponse.success(cartService.removeItem(principal.userId(), itemIndex)));
     }
 
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> clearCart(@AuthenticationPrincipal String userId) {
-        cartService.clearCart(userId);
+    public ResponseEntity<ApiResponse<Void>> clearCart(
+            @AuthenticationPrincipal UserPrincipal principal) {
+        cartService.clearCart(principal.userId());
         return ResponseEntity.ok(ApiResponse.success("Cart cleared", null));
     }
 }

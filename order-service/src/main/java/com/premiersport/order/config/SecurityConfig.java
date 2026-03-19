@@ -37,7 +37,6 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Stripe webhook bypasses JWT auth
                 .requestMatchers(HttpMethod.POST, "/api/v1/orders/webhook/stripe").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated()
@@ -64,8 +63,9 @@ public class SecurityConfig {
                     if (jwtUtil.validateToken(token)) {
                         String userId = jwtUtil.extractUserId(token);
                         String role = jwtUtil.extractRole(token);
+                        String email = jwtUtil.extractEmail(token);
                         var auth = new UsernamePasswordAuthenticationToken(
-                            userId,
+                            new UserPrincipal(userId, email),
                             null,
                             List.of(new SimpleGrantedAuthority("ROLE_" + role))
                         );

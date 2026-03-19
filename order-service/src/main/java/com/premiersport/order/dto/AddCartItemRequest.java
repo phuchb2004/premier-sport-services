@@ -25,7 +25,6 @@ public class AddCartItemRequest {
     @Min(1)
     private Integer quantity;
 
-    @NotNull
-    @Min(0)
-    private Double unitPrice;
+    // unitPrice is intentionally NOT accepted from the client.
+    // The server fetches the authoritative price from product-service.
 }

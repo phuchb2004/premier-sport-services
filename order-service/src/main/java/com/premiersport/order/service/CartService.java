@@ -1,6 +1,7 @@
 package com.premiersport.order.service;
 
 import com.premiersport.common.exception.ApiException;
+import com.premiersport.order.client.ProductServiceClient;
 import com.premiersport.order.dto.AddCartItemRequest;
 import com.premiersport.order.entity.CartEntity;
 import com.premiersport.order.repository.CartRepository;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 public class CartService {
 
     private final CartRepository cartRepository;
+    private final ProductServiceClient productServiceClient;
 
     public CartEntity getOrCreateCart(String userId) {
         return cartRepository.findByUserId(userId)
@@ -28,14 +30,19 @@ public class CartService {
     }
 
     public CartEntity addItem(String userId, AddCartItemRequest request) {
+        // Fetch authoritative price from product-service to prevent client-side tampering (#2)
+        double serverPrice = productServiceClient.getProductPrice(request.getProductId());
+
         CartEntity cart = getOrCreateCart(userId);
 
-        // Check if same product+size already in cart — merge quantities
+        // Merge quantities if same product+size already in cart
         boolean merged = false;
         for (CartEntity.CartItem existing : cart.getItems()) {
             if (existing.getProductId().equals(request.getProductId())
                     && existing.getSize().equals(request.getSize())) {
                 existing.setQuantity(existing.getQuantity() + request.getQuantity());
+                // Also refresh the price in case it changed since last add
+                existing.setUnitPrice(serverPrice);
                 merged = true;
                 break;
             }
@@ -49,7 +56,7 @@ public class CartService {
                     .size(request.getSize())
                     .color(request.getColor())
                     .quantity(request.getQuantity())
-                    .unitPrice(request.getUnitPrice())
+                    .unitPrice(serverPrice)
                     .build();
             cart.getItems().add(item);
         }
