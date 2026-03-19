@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.text.Normalizer;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -33,8 +34,9 @@ public class ProductService {
     private final MongoTemplate mongoTemplate;
 
     public Page<ProductEntity> getProducts(String category, String search, int page, int size, String sort) {
+        int clampedSize = Math.max(1, Math.min(size, 100));
         Sort sorting = resolveSort(sort);
-        Pageable pageable = PageRequest.of(page, size, sorting);
+        Pageable pageable = PageRequest.of(page, clampedSize, sorting);
 
         Criteria criteria = new Criteria();
 
@@ -48,10 +50,11 @@ public class ProductService {
         }
 
         if (search != null && !search.isBlank()) {
+            String escaped = Pattern.quote(search.trim());
             Criteria searchCriteria = new Criteria().orOperator(
-                    Criteria.where("name").regex(search, "i"),
-                    Criteria.where("brand").regex(search, "i"),
-                    Criteria.where("description").regex(search, "i")
+                    Criteria.where("name").regex(escaped, "i"),
+                    Criteria.where("brand").regex(escaped, "i"),
+                    Criteria.where("description").regex(escaped, "i")
             );
             criteria = criteria.andOperator(searchCriteria);
         }
@@ -129,7 +132,11 @@ public class ProductService {
         if (request.getDescription() != null) product.setDescription(request.getDescription().trim());
         if (request.getCategory() != null) product.setCategory(request.getCategory());
         if (request.getPrice() != null) product.setPrice(request.getPrice());
-        if (request.getSalePrice() != null) product.setSalePrice(request.getSalePrice());
+        if (request.isClearSalePrice()) {
+            product.setSalePrice(null);
+        } else if (request.getSalePrice() != null) {
+            product.setSalePrice(request.getSalePrice());
+        }
         if (request.getImages() != null) product.setImages(request.getImages());
         if (request.getSizes() != null) product.setSizes(request.getSizes());
         if (request.getStock() != null) product.setStock(request.getStock());

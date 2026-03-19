@@ -1,5 +1,6 @@
 package com.premiersport.product.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,6 +49,7 @@ public class ProductEntity {
     private int stock;
 
     @Builder.Default
+    @JsonProperty("isFeatured")
     private boolean isFeatured = false;
 
     @CreatedDate

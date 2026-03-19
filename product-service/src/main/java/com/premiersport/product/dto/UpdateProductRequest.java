@@ -23,6 +23,9 @@ public class UpdateProductRequest {
 
     private Double salePrice;
 
+    // Set to true to remove the sale price entirely
+    private boolean clearSalePrice = false;
+
     private List<String> images;
 
     private List<String> sizes;
