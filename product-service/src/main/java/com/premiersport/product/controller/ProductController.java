@@ -46,6 +46,12 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(counts));
     }
 
+    @GetMapping("/id/{id}")
+    public ResponseEntity<ApiResponse<ProductEntity>> getProductById(@PathVariable String id) {
+        ProductEntity product = productService.getProductById(id);
+        return ResponseEntity.ok(ApiResponse.success(product));
+    }
+
     @GetMapping("/{slug}")
     public ResponseEntity<ApiResponse<ProductEntity>> getProductBySlug(@PathVariable String slug) {
         ProductEntity product = productService.getProductBySlug(slug);
