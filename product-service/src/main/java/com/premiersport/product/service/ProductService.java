@@ -33,7 +33,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final MongoTemplate mongoTemplate;
 
-    public Page<ProductEntity> getProducts(String category, String search, int page, int size, String sort) {
+    public Page<ProductEntity> getProducts(String category, String search, Double maxPrice, int page, int size, String sort) {
         int clampedSize = Math.max(1, Math.min(size, 100));
         Sort sorting = resolveSort(sort);
         Pageable pageable = PageRequest.of(page, clampedSize, sorting);
@@ -57,6 +57,10 @@ public class ProductService {
                     Criteria.where("description").regex(escaped, "i")
             );
             criteria = criteria.andOperator(searchCriteria);
+        }
+
+        if (maxPrice != null) {
+            criteria = criteria.and("price").lte(maxPrice);
         }
 
         Query query = new Query(criteria).with(pageable);

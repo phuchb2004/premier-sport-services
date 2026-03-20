@@ -29,10 +29,11 @@ public class ProductController {
     public ResponseEntity<ApiResponse<Page<ProductEntity>>> getProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) Double maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(defaultValue = "newest") String sort) {
-        Page<ProductEntity> products = productService.getProducts(category, search, page, size, sort);
+        Page<ProductEntity> products = productService.getProducts(category, search, maxPrice, page, size, sort);
         return ResponseEntity.ok(ApiResponse.success(products));
     }
 

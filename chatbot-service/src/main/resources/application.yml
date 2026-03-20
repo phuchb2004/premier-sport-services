@@ -16,6 +16,9 @@ openai:
 product-service:
   url: ${PRODUCT_SERVICE_URL:http://localhost:8082}
 
+jwt:
+  secret: ${JWT_SECRET:chatbot-service-dummy-jwt-secret-not-used-here}
+
 management:
   endpoints:
     web:
