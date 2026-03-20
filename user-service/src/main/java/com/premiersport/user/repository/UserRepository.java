@@ -1,6 +1,8 @@
 package com.premiersport.user.repository;
 
 import com.premiersport.user.entity.UserEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +12,5 @@ import java.util.Optional;
 public interface UserRepository extends MongoRepository<UserEntity, String> {
     Optional<UserEntity> findByEmail(String email);
     boolean existsByEmail(String email);
+    Page<UserEntity> findByEmailContainingIgnoreCase(String email, Pageable pageable);
 }

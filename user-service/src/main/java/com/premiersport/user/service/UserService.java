@@ -88,17 +88,27 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Page<UserEntity> getAllUsers(Pageable pageable) {
+    public Page<UserEntity> getAllUsers(String email, Pageable pageable) {
+        if (email != null && !email.isBlank()) {
+            return userRepository.findByEmailContainingIgnoreCase(email.trim(), pageable);
+        }
         return userRepository.findAll(pageable);
     }
 
     public UserEntity updateRole(String userId, String role) {
         UserEntity user = getById(userId);
-        user.setRole(UserEntity.Role.valueOf(role.toUpperCase()));
+        try {
+            user.setRole(UserEntity.Role.valueOf(role.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw ApiException.badRequest("Invalid role: must be USER or ADMIN");
+        }
         return userRepository.save(user);
     }
 
-    public UserEntity updateStatus(String userId, boolean enabled) {
+    public UserEntity updateStatus(String userId, boolean enabled, String adminId) {
+        if (userId.equals(adminId)) {
+            throw ApiException.forbidden("Admin cannot disable their own account");
+        }
         UserEntity user = getById(userId);
         user.setEnabled(enabled);
         return userRepository.save(user);

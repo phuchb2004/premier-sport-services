@@ -31,6 +31,7 @@
         <java.version>23</java.version>
         <spring-cloud.version>2024.0.1</spring-cloud.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <aws.sdk.version>2.29.52</aws.sdk.version>
     </properties>
 
     <dependencyManagement>
@@ -48,6 +49,14 @@
                 <groupId>com.premiersport</groupId>
                 <artifactId>common-lib</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <!-- AWS SDK v2 BOM -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <!-- JWT -->
             <dependency>

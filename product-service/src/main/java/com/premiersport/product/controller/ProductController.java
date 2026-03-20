@@ -5,6 +5,7 @@ import com.premiersport.product.dto.CreateProductRequest;
 import com.premiersport.product.dto.UpdateProductRequest;
 import com.premiersport.product.entity.ProductEntity;
 import com.premiersport.product.service.ProductService;
+import com.premiersport.product.service.S3Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductService productService;
+    private final S3Service s3Service;
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductEntity>>> getProducts(
@@ -56,6 +58,14 @@ public class ProductController {
     public ResponseEntity<ApiResponse<ProductEntity>> getProductBySlug(@PathVariable String slug) {
         ProductEntity product = productService.getProductBySlug(slug);
         return ResponseEntity.ok(ApiResponse.success(product));
+    }
+
+    @GetMapping("/admin/presigned-url")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Map<String, String>>> getPresignedUrl(
+            @RequestParam String filename) {
+        Map<String, String> result = s3Service.generatePresignedPutUrl(filename);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PostMapping

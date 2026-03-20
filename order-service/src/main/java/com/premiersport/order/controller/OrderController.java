@@ -2,9 +2,11 @@ package com.premiersport.order.controller;
 
 import com.premiersport.common.dto.ApiResponse;
 import com.premiersport.order.config.UserPrincipal;
+import com.premiersport.order.dto.AnalyticsDto;
 import com.premiersport.order.dto.CreateOrderRequest;
 import com.premiersport.order.dto.UpdateOrderStatusRequest;
 import com.premiersport.order.entity.OrderEntity;
+import com.premiersport.order.service.AnalyticsService;
 import com.premiersport.order.service.OrderService;
 import com.premiersport.order.service.StripeService;
 import jakarta.validation.Valid;
@@ -28,6 +30,7 @@ public class OrderController {
 
     private final OrderService orderService;
     private final StripeService stripeService;
+    private final AnalyticsService analyticsService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<OrderEntity>> createOrder(
@@ -56,6 +59,12 @@ public class OrderController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<OrderEntity>>> getAllOrders(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(orderService.getAllAdmin(pageable)));
+    }
+
+    @GetMapping("/admin/analytics")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<AnalyticsDto>> getAnalytics() {
+        return ResponseEntity.ok(ApiResponse.success(analyticsService.getAnalytics()));
     }
 
     @PutMapping("/admin/{id}/status")

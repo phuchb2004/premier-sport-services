@@ -55,8 +55,10 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Page<UserEntity>>> getAllUsers(Pageable pageable) {
-        Page<UserEntity> users = userService.getAllUsers(pageable);
+    public ResponseEntity<ApiResponse<Page<UserEntity>>> getAllUsers(
+            @RequestParam(required = false) String email,
+            Pageable pageable) {
+        Page<UserEntity> users = userService.getAllUsers(email, pageable);
         return ResponseEntity.ok(ApiResponse.success(users));
     }
 
@@ -79,9 +81,10 @@ public class UserController {
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserEntity>> updateStatus(
+            Authentication auth,
             @PathVariable String id,
             @Valid @RequestBody UpdateStatusRequest request) {
-        UserEntity user = userService.updateStatus(id, request.getEnabled());
+        UserEntity user = userService.updateStatus(id, request.getEnabled(), auth.getName());
         return ResponseEntity.ok(ApiResponse.success("Status updated", user));
     }
 }
