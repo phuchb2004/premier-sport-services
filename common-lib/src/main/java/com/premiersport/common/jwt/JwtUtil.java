@@ -30,10 +30,26 @@ public class JwtUtil {
                 .subject(userId)
                 .claim("email", email)
                 .claim("role", role)
+                .claim("type", "access")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    public String generateRefreshToken(String userId) {
+        long refreshExpirationMs = 7L * 24 * 60 * 60 * 1000; // 7 days
+        return Jwts.builder()
+                .subject(userId)
+                .claim("type", "refresh")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + refreshExpirationMs))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public boolean isRefreshToken(String token) {
+        return "refresh".equals(extractClaim(token, claims -> claims.get("type", String.class)));
     }
 
     public Claims extractAllClaims(String token) {

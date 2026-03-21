@@ -3,6 +3,7 @@ package com.premiersport.user.controller;
 import com.premiersport.common.dto.ApiResponse;
 import com.premiersport.user.dto.AuthResponse;
 import com.premiersport.user.dto.LoginRequest;
+import com.premiersport.user.dto.RefreshTokenRequest;
 import com.premiersport.user.dto.RegisterRequest;
 import com.premiersport.user.service.UserService;
 import jakarta.validation.Valid;
@@ -31,5 +32,18 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request) {
         AuthResponse response = userService.login(request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        AuthResponse response = userService.refresh(request.getRefreshToken());
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout() {
+        // JWT is stateless — client removes the token; server acknowledges
+        return ResponseEntity.ok(ApiResponse.success("Logged out successfully", null));
     }
 }

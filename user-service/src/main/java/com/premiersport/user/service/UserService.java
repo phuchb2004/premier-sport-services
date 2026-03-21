@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,7 +24,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
 
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail().toLowerCase().trim())) {
             throw ApiException.conflict("Email already registered");
         }
 
@@ -84,8 +86,33 @@ public class UserService {
         if (address.isDefault()) {
             user.getAddresses().forEach(a -> a.setDefault(false));
         }
+        // Ensure address has an id
+        if (address.getId() == null || address.getId().isBlank()) {
+            address.setId(UUID.randomUUID().toString());
+        }
         user.getAddresses().add(address);
         return userRepository.save(user);
+    }
+
+    public UserEntity removeAddress(String userId, String addressId) {
+        UserEntity user = getById(userId);
+        boolean removed = user.getAddresses().removeIf(a -> addressId.equals(a.getId()));
+        if (!removed) {
+            throw ApiException.notFound("Address not found");
+        }
+        return userRepository.save(user);
+    }
+
+    public AuthResponse refresh(String refreshToken) {
+        if (!jwtUtil.validateToken(refreshToken) || !jwtUtil.isRefreshToken(refreshToken)) {
+            throw ApiException.unauthorized("Invalid or expired refresh token");
+        }
+        String userId = jwtUtil.extractUserId(refreshToken);
+        UserEntity user = getById(userId);
+        if (!user.isEnabled()) {
+            throw ApiException.unauthorized("Account is disabled");
+        }
+        return buildAuthResponse(user);
     }
 
     public Page<UserEntity> getAllUsers(String email, Pageable pageable) {
@@ -115,10 +142,12 @@ public class UserService {
     }
 
     private AuthResponse buildAuthResponse(UserEntity user) {
-        String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
+        String accessToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId());
 
         return AuthResponse.builder()
-                .accessToken(token)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .user(AuthResponse.UserDto.builder()
                         .id(user.getId())
                         .email(user.getEmail())
