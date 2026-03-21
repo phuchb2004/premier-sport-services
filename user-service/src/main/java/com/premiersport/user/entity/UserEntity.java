@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -59,6 +60,8 @@ public class UserEntity {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Address {
+        @Builder.Default
+        private String id = UUID.randomUUID().toString();
         private String street;
         private String city;
         private String state;

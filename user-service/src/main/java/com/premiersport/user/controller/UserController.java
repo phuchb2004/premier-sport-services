@@ -53,6 +53,14 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Address added", user));
     }
 
+    @DeleteMapping("/me/addresses/{addressId}")
+    public ResponseEntity<ApiResponse<UserEntity>> removeAddress(
+            Authentication auth,
+            @PathVariable String addressId) {
+        UserEntity user = userService.removeAddress(auth.getName(), addressId);
+        return ResponseEntity.ok(ApiResponse.success("Address removed", user));
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<UserEntity>>> getAllUsers(
