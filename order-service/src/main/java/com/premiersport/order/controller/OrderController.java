@@ -3,6 +3,7 @@ package com.premiersport.order.controller;
 import com.premiersport.common.dto.ApiResponse;
 import com.premiersport.order.config.UserPrincipal;
 import com.premiersport.order.dto.AnalyticsDto;
+import com.premiersport.order.dto.ConfirmPaymentRequest;
 import com.premiersport.order.dto.CreateOrderRequest;
 import com.premiersport.order.dto.UpdateOrderStatusRequest;
 import com.premiersport.order.entity.OrderEntity;
@@ -75,7 +76,16 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(orderService.updateStatus(id, request.getStatus())));
     }
 
-    // --- Payment endpoints (merged from PaymentController, fix #16) ---
+    // --- Payment endpoints ---
+
+    @PostMapping("/{id}/confirm-payment")
+    public ResponseEntity<ApiResponse<OrderEntity>> confirmPayment(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable String id,
+            @Valid @RequestBody ConfirmPaymentRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(
+                orderService.confirmPayment(id, principal.userId(), request.getPaymentMethod())));
+    }
 
     @PostMapping("/{id}/pay")
     public ResponseEntity<ApiResponse<Map<String, String>>> createPaymentIntent(

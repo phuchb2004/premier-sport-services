@@ -25,6 +25,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartService cartService;
     private final CounterService counterService;
+    private final EmailService emailService;
 
     public OrderEntity createFromCart(String userId, String customerEmail, CreateOrderRequest request) {
         CartEntity cart = cartService.getOrCreateCart(userId);
@@ -79,6 +80,28 @@ public class OrderService {
         if (!isAdmin && !order.getUserId().equals(userId)) {
             throw ApiException.forbidden("Access denied");
         }
+
+        return order;
+    }
+
+    public OrderEntity confirmPayment(String orderId, String userId, String paymentMethod) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> ApiException.notFound("Order not found"));
+
+        if (!order.getUserId().equals(userId)) {
+            throw ApiException.forbidden("Access denied");
+        }
+
+        if (order.getPaymentStatus() == OrderEntity.PaymentStatus.PAID) {
+            throw ApiException.badRequest("Order is already paid");
+        }
+
+        order.setPaymentStatus(OrderEntity.PaymentStatus.PAID);
+        order.setStatus(OrderEntity.OrderStatus.CONFIRMED);
+        order = orderRepository.save(order);
+
+        log.info("Payment confirmed via {} for order: {}", paymentMethod, order.getOrderNumber());
+        emailService.sendOrderConfirmation(order);
 
         return order;
     }
