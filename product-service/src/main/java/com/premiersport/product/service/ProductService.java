@@ -38,7 +38,7 @@ public class ProductService {
         Sort sorting = resolveSort(sort);
         Pageable pageable = PageRequest.of(page, clampedSize, sorting);
 
-        Criteria criteria = new Criteria();
+        Criteria criteria = Criteria.where("isDeleted").ne(true);
 
         if (category != null && !category.isBlank()) {
             try {
@@ -71,7 +71,7 @@ public class ProductService {
     }
 
     public ProductEntity getProductBySlug(String slug) {
-        return productRepository.findBySlug(slug)
+        return productRepository.findBySlugAndIsDeletedFalse(slug)
                 .orElseThrow(() -> ApiException.notFound("Product not found: " + slug));
     }
 
@@ -81,12 +81,13 @@ public class ProductService {
     }
 
     public List<ProductEntity> getFeaturedProducts() {
-        return productRepository.findByIsFeaturedTrue();
+        return productRepository.findByIsFeaturedTrueAndIsDeletedFalse(PageRequest.of(0, 8));
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> getCategoryCounts() {
         Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("isDeleted").ne(true)),
                 Aggregation.group("category").count().as("count"),
                 Aggregation.project("count").and("_id").as("category")
         );
@@ -152,11 +153,10 @@ public class ProductService {
     }
 
     public void deleteProduct(String id) {
-        if (!productRepository.existsById(id)) {
-            throw ApiException.notFound("Product not found");
-        }
-        productRepository.deleteById(id);
-        log.info("Product deleted: {}", id);
+        ProductEntity product = getProductById(id);
+        product.setDeleted(true);
+        productRepository.save(product);
+        log.info("Product soft-deleted: {}", id);
     }
 
     private Sort resolveSort(String sort) {

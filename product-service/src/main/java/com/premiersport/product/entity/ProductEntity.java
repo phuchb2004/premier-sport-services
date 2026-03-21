@@ -52,6 +52,9 @@ public class ProductEntity {
     @JsonProperty("isFeatured")
     private boolean isFeatured = false;
 
+    @Builder.Default
+    private boolean isDeleted = false;
+
     @CreatedDate
     private Instant createdAt;
 

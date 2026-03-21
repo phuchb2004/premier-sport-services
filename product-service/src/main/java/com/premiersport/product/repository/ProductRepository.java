@@ -6,13 +6,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface ProductRepository extends MongoRepository<ProductEntity, String> {
 
-    Optional<ProductEntity> findBySlug(String slug);
+    Optional<ProductEntity> findBySlugAndIsDeletedFalse(String slug);
 
     boolean existsBySlug(String slug);
 
-    List<ProductEntity> findByIsFeaturedTrue();
+    List<ProductEntity> findByIsFeaturedTrueAndIsDeletedFalse(Pageable pageable);
 }
