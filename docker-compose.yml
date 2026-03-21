@@ -33,6 +33,7 @@ services:
       - user-service
       - product-service
       - order-service
+      - chatbot-service
 
   user-service:
     build:
