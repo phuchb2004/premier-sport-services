@@ -28,11 +28,20 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Build & Test
-        run: mvn clean verify -pl common-lib,user-service,product-service,order-service,chatbot-service --batch-mode
+      - name: Install parent POM
+        run: mvn install -N --batch-mode
+
+      - name: Install common-lib
+        run: mvn install -pl common-lib --batch-mode
+
+      - name: Build & Test all services
+        run: mvn clean verify -pl user-service,product-service,order-service,chatbot-service --batch-mode
         env:
           MONGODB_URI: mongodb://localhost:27017/premier-sport-test
           JWT_SECRET: test-jwt-secret-key-must-be-at-least-32-chars
+          STRIPE_SECRET_KEY: sk_test_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_placeholder
+          OPENAI_API_KEY: sk-placeholder
 
       - name: Build API Gateway
         run: mvn clean package -pl api-gateway --batch-mode -DskipTests

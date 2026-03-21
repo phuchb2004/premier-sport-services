@@ -74,6 +74,7 @@ services:
       MONGODB_URI: mongodb://mongodb:27017/premier-sport-dev
       JWT_SECRET: ${JWT_SECRET:-premier-sport-jwt-secret-key-must-be-at-least-32-characters}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      PRODUCT_SERVICE_URL: http://product-service:8082
     depends_on:
       mongodb:
         condition: service_healthy
