@@ -21,6 +21,13 @@ aws:
     bucket: ${AWS_S3_BUCKET:premier-sport-images}
     region: ${AWS_REGION:eu-west-1}
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: alpha
+
 management:
   endpoints:
     web:
