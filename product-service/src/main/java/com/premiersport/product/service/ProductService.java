@@ -73,8 +73,12 @@ public class ProductService {
     }
 
     public ProductEntity getProductBySlug(String slug) {
-        return productRepository.findBySlugAndIsDeletedFalse(slug)
-                .orElseThrow(() -> ApiException.notFound("Product not found: " + slug));
+        Query query = new Query(Criteria.where("slug").is(slug));
+        ProductEntity product = mongoTemplate.findOne(query, ProductEntity.class);
+        if (product == null || product.isDeleted()) {
+            throw ApiException.notFound("Product not found: " + slug);
+        }
+        return product;
     }
 
     public ProductEntity getProductById(String id) {
