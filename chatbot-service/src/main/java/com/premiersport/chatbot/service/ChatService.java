@@ -43,7 +43,7 @@ public class ChatService {
 
     private static final String SYSTEM_PROMPT = """
             You are a helpful Premier Sport assistant specialised in football and sports gear.
-            You help customers find the right products: kits, boots, accessories, and balls.
+            You help customers find the right products: jerseys, boots, accessories, and balls.
             When a customer asks about specific products, always use the searchProducts function to find relevant items from our catalogue.
             Always include the product link (e.g. /products/boots/nike-phantom-gt) so customers can view and buy.
             Be friendly, concise, and helpful. Keep responses under 200 words.
@@ -175,7 +175,7 @@ public class ChatService {
 
         Map<String, Object> categoryProp = new LinkedHashMap<>();
         categoryProp.put("type", "string");
-        categoryProp.put("enum", List.of("KITS", "BOOTS", "ACCESSORIES", "BALLS"));
+        categoryProp.put("enum", List.of("JERSEY", "BOOTS", "ACCESSORIES", "BALLS"));
         categoryProp.put("description", "Filter by product category");
 
         Map<String, Object> maxPriceProp = new LinkedHashMap<>();

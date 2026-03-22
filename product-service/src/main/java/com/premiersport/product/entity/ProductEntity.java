@@ -62,6 +62,6 @@ public class ProductEntity {
     private Instant updatedAt;
 
     public enum ProductCategory {
-        KITS, BOOTS, ACCESSORIES, BALLS
+        JERSEY, BOOTS, ACCESSORIES, BALLS
     }
 }

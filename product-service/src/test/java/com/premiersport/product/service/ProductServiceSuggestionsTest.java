@@ -91,14 +91,14 @@ class ProductServiceSuggestionsTest {
     void getSuggestions_multipleCategories_returnsDistinctCategoriesFromAll20() {
         List<ProductEntity> matches = new ArrayList<>();
         matches.addAll(buildProducts(3, ProductCategory.BOOTS, "Nike"));
-        matches.addAll(buildProducts(3, ProductCategory.KITS, "Adidas"));
+        matches.addAll(buildProducts(3, ProductCategory.JERSEY, "Adidas"));
         when(mongoTemplate.find(any(), eq(ProductEntity.class))).thenReturn(matches);
 
         SearchSuggestionsResponse result = productService.getSuggestions("sport");
 
         // Products capped at 5, but categories come from all 6
         assertThat(result.getProducts()).hasSize(5);
-        assertThat(result.getCategories()).containsExactlyInAnyOrder("BOOTS", "KITS");
+        assertThat(result.getCategories()).containsExactlyInAnyOrder("BOOTS", "JERSEY");
         assertThat(result.getBrands()).containsExactlyInAnyOrder("Nike", "Adidas");
     }
 
