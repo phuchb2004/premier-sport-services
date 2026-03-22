@@ -15,7 +15,7 @@ jwt:
   expiration: ${JWT_EXPIRATION:86400000}
 
 google:
-  client-id: ${GOOGLE_CLIENT_ID}
+  client-id: ${GOOGLE_CLIENT_ID:}
 
 springdoc:
   api-docs:

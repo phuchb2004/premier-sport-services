@@ -7,8 +7,8 @@ import com.premiersport.common.jwt.JwtUtil;
 import com.premiersport.user.dto.*;
 import com.premiersport.user.entity.UserEntity;
 import com.premiersport.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,13 +19,23 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final GoogleIdTokenVerifier googleIdTokenVerifier;
+
+    @Autowired
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil,
+                       @Autowired(required = false) GoogleIdTokenVerifier googleIdTokenVerifier) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+        this.googleIdTokenVerifier = googleIdTokenVerifier;
+    }
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail().toLowerCase().trim())) {
@@ -112,6 +122,9 @@ public class UserService {
     }
 
     public AuthResponse googleAuth(GoogleAuthRequest request) {
+        if (googleIdTokenVerifier == null) {
+            throw ApiException.badRequest("Google OAuth is not configured");
+        }
         GoogleIdToken idToken;
         try {
             idToken = googleIdTokenVerifier.verify(request.getCredential());
