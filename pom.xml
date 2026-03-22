@@ -81,6 +81,12 @@
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
             </dependency>
+            <!-- Google API Client (for Google OAuth token verification) -->
+            <dependency>
+                <groupId>com.google.api-client</groupId>
+                <artifactId>google-api-client</artifactId>
+                <version>2.4.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

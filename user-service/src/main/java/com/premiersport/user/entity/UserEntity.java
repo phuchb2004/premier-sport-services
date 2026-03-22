@@ -51,8 +51,18 @@ public class UserEntity {
     @LastModifiedDate
     private Instant updatedAt;
 
+    @Indexed(sparse = true)
+    private String googleId;
+
+    @Builder.Default
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
     public enum Role {
         USER, ADMIN
+    }
+
+    public enum AuthProvider {
+        LOCAL, GOOGLE
     }
 
     @Data

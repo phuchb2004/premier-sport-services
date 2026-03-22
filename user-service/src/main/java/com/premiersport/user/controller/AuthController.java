@@ -2,6 +2,7 @@ package com.premiersport.user.controller;
 
 import com.premiersport.common.dto.ApiResponse;
 import com.premiersport.user.dto.AuthResponse;
+import com.premiersport.user.dto.GoogleAuthRequest;
 import com.premiersport.user.dto.LoginRequest;
 import com.premiersport.user.dto.RefreshTokenRequest;
 import com.premiersport.user.dto.RegisterRequest;
@@ -45,5 +46,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> logout() {
         // JWT is stateless — client removes the token; server acknowledges
         return ResponseEntity.ok(ApiResponse.success("Logged out successfully", null));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<AuthResponse>> googleAuth(
+            @Valid @RequestBody GoogleAuthRequest request) {
+        AuthResponse response = userService.googleAuth(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

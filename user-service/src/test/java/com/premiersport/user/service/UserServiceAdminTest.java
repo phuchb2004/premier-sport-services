@@ -1,5 +1,6 @@
 package com.premiersport.user.service;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.premiersport.common.exception.ApiException;
 import com.premiersport.common.jwt.JwtUtil;
 import com.premiersport.user.entity.UserEntity;
@@ -29,6 +30,7 @@ class UserServiceAdminTest {
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtUtil jwtUtil;
+    @Mock private GoogleIdTokenVerifier googleIdTokenVerifier;
 
     @InjectMocks
     private UserService userService;
