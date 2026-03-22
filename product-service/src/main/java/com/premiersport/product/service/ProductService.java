@@ -2,6 +2,8 @@ package com.premiersport.product.service;
 
 import com.premiersport.common.exception.ApiException;
 import com.premiersport.product.dto.CreateProductRequest;
+import com.premiersport.product.dto.ProductSuggestionDto;
+import com.premiersport.product.dto.SearchSuggestionsResponse;
 import com.premiersport.product.dto.UpdateProductRequest;
 import com.premiersport.product.entity.ProductEntity;
 import com.premiersport.product.entity.ProductEntity.ProductCategory;
@@ -82,6 +84,49 @@ public class ProductService {
 
     public List<ProductEntity> getFeaturedProducts() {
         return productRepository.findByIsFeaturedTrueAndIsDeletedFalse(PageRequest.of(0, 8));
+    }
+
+    public SearchSuggestionsResponse getSuggestions(String q) {
+        if (q == null || q.isBlank() || q.length() < 2 || q.length() > 50) {
+            return new SearchSuggestionsResponse(List.of(), List.of(), List.of());
+        }
+
+        String escaped = Pattern.quote(q.trim());
+        Criteria baseCriteria = Criteria.where("isDeleted").ne(true);
+        Criteria searchCriteria = new Criteria().orOperator(
+                Criteria.where("name").regex(escaped, "i"),
+                Criteria.where("brand").regex(escaped, "i")
+        );
+        Criteria combined = baseCriteria.andOperator(searchCriteria);
+
+        Query query = new Query(combined).limit(20);
+        List<ProductEntity> matches = mongoTemplate.find(query, ProductEntity.class);
+
+        List<ProductSuggestionDto> products = matches.stream()
+                .limit(5)
+                .map(p -> new ProductSuggestionDto(
+                        p.getId(),
+                        p.getName(),
+                        p.getSlug(),
+                        p.getImages().isEmpty() ? null : p.getImages().get(0),
+                        p.getPrice(),
+                        p.getSalePrice(),
+                        p.getCategory()
+                ))
+                .toList();
+
+        List<String> categories = matches.stream()
+                .map(p -> p.getCategory().name())
+                .distinct()
+                .toList();
+
+        List<String> brands = matches.stream()
+                .map(ProductEntity::getBrand)
+                .filter(b -> b != null && !b.isBlank())
+                .distinct()
+                .toList();
+
+        return new SearchSuggestionsResponse(products, categories, brands);
     }
 
     @SuppressWarnings("unchecked")

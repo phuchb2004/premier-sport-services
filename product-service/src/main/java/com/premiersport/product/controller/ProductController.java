@@ -2,6 +2,7 @@ package com.premiersport.product.controller;
 
 import com.premiersport.common.dto.ApiResponse;
 import com.premiersport.product.dto.CreateProductRequest;
+import com.premiersport.product.dto.SearchSuggestionsResponse;
 import com.premiersport.product.dto.UpdateProductRequest;
 import com.premiersport.product.entity.ProductEntity;
 import com.premiersport.product.service.ProductService;
@@ -53,6 +54,13 @@ public class ProductController {
     public ResponseEntity<ApiResponse<ProductEntity>> getProductById(@PathVariable String id) {
         ProductEntity product = productService.getProductById(id);
         return ResponseEntity.ok(ApiResponse.success(product));
+    }
+
+    @GetMapping("/search/suggestions")
+    public ResponseEntity<ApiResponse<SearchSuggestionsResponse>> getSuggestions(
+            @RequestParam(required = false, defaultValue = "") String q) {
+        SearchSuggestionsResponse response = productService.getSuggestions(q);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/{slug}")
